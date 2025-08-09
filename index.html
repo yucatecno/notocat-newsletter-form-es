@@ -63,17 +63,18 @@
             cursor: not-allowed;
         }
         .message {
-            margin-top: 6px;
-            padding: 4px 8px;
+            padding: 8px;
             border-radius: 3px;
             font-size: 13px;
+            text-align: center;
+            margin: 0;
         }
-        .success {
+        .message.success {
             background-color: #edf7ed;
             color: #0f5132;
             border: 1px solid #d1e7dd;
         }
-        .error {
+        .message.error {
             background-color: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
@@ -82,11 +83,11 @@
 </head>
 <body>
     <div class="form-container">
-        <div class="form-row">
+        <div class="form-row" id="formRow">
             <input type="email" id="email" placeholder="Enter email to subscribe" required>
             <button type="button" onclick="subscribeEmail()">Subscribe</button>
         </div>
-        <div id="message"></div>
+        <div id="message" style="display: none;"></div>
     </div>
 
     <script>
@@ -154,15 +155,30 @@
         
         function showMessage(text, type) {
             const messageDiv = document.getElementById('message');
+            const formRow = document.getElementById('formRow');
+            
+            // Hide form and show message in its place for both success and error
+            formRow.style.display = 'none';
+            messageDiv.style.display = 'block';
             messageDiv.textContent = text;
             messageDiv.className = 'message ' + type;
             
-            // Auto-clear success messages after 3 seconds
             if (type === 'success') {
+                // Show form again after 3 seconds for success
                 setTimeout(() => {
+                    formRow.style.display = 'flex';
+                    messageDiv.style.display = 'none';
                     messageDiv.textContent = '';
                     messageDiv.className = '';
                 }, 3000);
+            } else {
+                // Show form again after 2 seconds for errors
+                setTimeout(() => {
+                    formRow.style.display = 'flex';
+                    messageDiv.style.display = 'none';
+                    messageDiv.textContent = '';
+                    messageDiv.className = '';
+                }, 2000);
             }
         }
         
@@ -174,4 +190,5 @@
         });
     </script>
 </body>
+</html>
 </html>
