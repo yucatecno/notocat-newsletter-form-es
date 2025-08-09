@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newsletter Signup</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .form-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            width: 100%;
+        }
+        h2 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+        input[type="email"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        input[type="email"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .config-note {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <div class="config-note">
+            <strong>Status:</strong> Configured with your Notocat credentials! The API endpoint is based on common patterns - if you get errors, you may need to verify the exact endpoint in Notocat's documentation.
+        </div>
+        
+        <h2>Subscribe to Newsletter</h2>
+        <div id="emailForm">
+            <div class="form-group">
+                <label for="email">Email Address:</label>
+                <input type="email" id="email" placeholder="Enter your email" required>
+            </div>
+            <button type="button" onclick="subscribeEmail()">Subscribe</button>
+        </div>
+        <div id="message"></div>
+    </div>
+
+    <script>
+        // ✅ CONFIGURED - Your actual Notocat credentials
+        const NOTOCAT_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzcl9BT0N3TUF1clYwbTRVNVE4dVBKZjIiLCJyZWYiOiJIUE56c3lZRWtvTUppbjJ0TGNUd04iLCJpYXQiOjE3NTQ3NzEzNDEsImV4cCI6MzE3Mjk5MjEzNzQxfQ.9JwhSbtJhth5UJkXPDIR5zrC97PxkLq8NLqQrfrAIaI';
+        const NEWSLETTER_ID = 'wks_9CxTGwh5iBTrZDiXuV37n';
+        // Common API endpoint patterns - may need adjustment based on actual Notocat API
+        const API_ENDPOINT = 'https://api.notocat.com/v1/newsletters/' + NEWSLETTER_ID + '/subscribers';
+
+        async function subscribeEmail() {
+            const email = document.getElementById('email').value;
+            const messageDiv = document.getElementById('message');
+            const button = document.querySelector('button');
+            
+            // Validation
+            if (!email) {
+                showMessage('Please enter an email address.', 'error');
+                return;
+            }
+            
+            // Check if email is valid
+            if (!email.includes('@')) {
+                showMessage('Please enter a valid email address.', 'error');
+                return;
+            }
+            
+            // Disable button during request
+            button.disabled = true;
+            button.textContent = 'Subscribing...';
+            
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + NOTOCAT_API_KEY,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email
+                        // Add any other required fields based on Notocat's API documentation
+                    })
+                });
+                
+                if (response.ok) {
+                    showMessage('Successfully subscribed! Thank you.', 'success');
+                    document.getElementById('email').value = ''; // Clear the form
+                } else {
+                    const errorData = await response.json();
+                    showMessage('Subscription failed: ' + (errorData.message || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Network error. Please try again.', 'error');
+            } finally {
+                // Re-enable button
+                button.disabled = false;
+                button.textContent = 'Subscribe';
+            }
+        }
+        
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = 'message ' + type;
+        }
+        
+        // Allow Enter key to submit
+        document.getElementById('email').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                subscribeEmail();
+            }
+        });
+    </script>
+</body>
+</html>
